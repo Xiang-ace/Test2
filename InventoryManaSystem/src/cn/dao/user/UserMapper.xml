@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.dao.user.UserMapper">
+	<resultMap type="User" id="userMap">
+		<id column="id" property="id" />
+		<result column="userCode" property="userCode" />
+		<result column="userPassword" property="userPassword" />
+		<result column="userName" property="userName" />
+		<result column="gender" property="gender" />
+		<result column="birthday" property="birthday" />
+		<result column="phone" property="phone" />
+		<result column="address" property="address" />
+		<result column="userRole" property="userRole" />
+		<result column="createdBy" property="createdBy" />
+		<result column="creationDate" property="creationDate" />
+		<result column="modifyBy" property="modifyBy" />
+		<result column="modifyDate" property="modifyDate" />
+		<result column="userPhoto" property="userPhoto" />
+		<!-- 映射role类 -->
+		<association property="role" javaType="Roler">
+			<id column="userRole" property="id" />
+			<result column="roleCode" property="roleCode" />
+			<result column="roleName" property="roleName" />
+			<result column="createdBy" property="createdBy" />
+			<result column="creationDate" property="creationDate" />
+			<result column="modifyBy" property="modifyBy" />
+			<result column="modifyDate" property="modifyDate" />
+		</association>
+	</resultMap>
+
+	<resultMap type="Roler" id="roleMap">
+		<id column="id" property="id" />
+		<result column="roleCode" property="roleCode" />
+		<result column="roleName" property="roleName" />
+		<result column="createdBy" property="createdBy" />
+		<result column="creationDate" property="creationDate" />
+	</resultMap>
+
+	<select id="login" resultMap="userMap">
+		select * from smbms_user where
+		userCode=#{userCode} and userPassword=#{userPassword}
+	</select>
+
+	<update id="modifyPassword">
+		update smbms_user set userPassword=#{password} where
+		id=#{id}
+	</update>
+
+	<select id="findRoler" resultMap="roleMap">
+		select * from smbms_role
+	</select>
+
+	<select id="findUser" resultMap="userMap">
+		select user.id,userCode,userName,gender,birthday,phone,roleName from
+		smbms_user user,smbms_role role
+		where userRole = role.id
+		<if test="userName != null and userName != ''">
+			and userName like CONCAT("%",#{userName},"%")
+		</if>
+		<if test="userRole != null and userRole != ''">
+			and userRole=#{userRole}
+		</if>
+		order by userRole asc
+	</select>
+
+	<select id="findTotalCount" resultType="int">
+		select count(1) from smbms_user,smbms_role role where userRole =
+		role.id
+		<if test="userName != null and userName != ''">
+			and userName like CONCAT("%",#{userName},"%")
+		</if>
+		<if test="userRole != null and userRole != ''">
+			and userRole=#{userRole}
+		</if>
+	</select>
+
+	<select id="checkUserCode" resultMap="userMap">
+		select * from smbms_user
+		where userCode=#{userCode}
+	</select>
+
+	<insert id="addUser" parameterType="User">
+		insert into smbms_user
+		values(#{id},#{userCode},#{userName},
+		#{userPassword},#{gender},#{birthday},#{phone},#{address},#{userRole},
+		#{createdBy},#{creationDate},#{modifyBy},#{modifyDate},#{userPhoto})
+	</insert>
+
+	<select id="findUserById" resultMap="userMap">
+		select
+		user.id,userCode,userName,gender,birthday,phone,address,role.roleName,userPhoto
+		from smbms_user user,smbms_role role where role.id=user.userRole and
+		user.id=#{userId }
+	</select>
+
+	<update id="modifyUser" parameterType="User">
+		update smbms_user set
+		userName=#{userName},gender=#{gender},birthday=#{birthday},phone=#{phone},address=#{address},
+		userRole=#{userRole},userPhoto=#{userPhoto} where id=#{id}
+	</update>
+
+	<delete id="delUser">
+		delete from smbms_user where id=#{userId}
+	</delete>
+	<update id="modifyPhoto">
+		update smbms_user set userPhoto=#{userPhoto} where
+		id=#{id}
+	</update>
+	<select id="showPhoto" resultType="User">
+		select * from smbms_user where
+		id=#{id}
+	</select>
+</mapper>

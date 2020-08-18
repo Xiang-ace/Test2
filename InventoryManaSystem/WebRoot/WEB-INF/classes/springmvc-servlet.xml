@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+	<context:component-scan
+		base-package="cn.controller"></context:component-scan>
+	<!-- <mvc:annotation-driven>会自动注册RequestMappingHandlerMapping 与RequestMappingHandlerAdapter两个Bean,这是Spring 
+		MVC为@Controller 分发请求所必需的，并且提供了数据绑定支持，@NumberFormatannotation支持， @DateTimeFormat支持,@Valid支持读写XML的支持(JAXB)和读写JSON的支持(默认Jackson)等功能。 -->
+	<mvc:annotation-driven></mvc:annotation-driven>
+
+	<mvc:default-servlet-handler />
+	<!-- <mvc:resources location="/statics/" mapping="/statics/**"></mvc:resources> -->
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+	<!-- 拦截器 -->
+	<mvc:interceptors>
+		<!-- 浏览权限(登录方可浏览) -->
+		<mvc:interceptor>
+			<mvc:mapping path="/sys/**" />
+			<bean class="cn.util.LoginInterceptor"></bean>
+		</mvc:interceptor>
+		<!-- 用户信息查看权限(只有管理员可以查看) -->
+		<mvc:interceptor>
+			<mvc:mapping path="/sys/admin/**" />
+			<bean class="cn.util.AuthorityInterceptor"></bean>
+		</mvc:interceptor>
+		<!-- 设置普通员工权限 -->
+		<mvc:interceptor>
+			<mvc:mapping path="/sys/provider" />
+			<bean class="cn.util.EmployeeInterceptor"></bean>
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- 文件解析器 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="defaultEncoding" value="UTF-8"></property>
+		<property name="maxUploadSize" value="10485760"></property>
+	</bean>
+
+</beans>

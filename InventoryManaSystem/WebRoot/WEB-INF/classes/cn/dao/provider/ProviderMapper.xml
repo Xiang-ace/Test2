@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.dao.provider.ProviderMapper">
+	<resultMap type="Provider" id="providerMap">
+		<id column="id" property="id" />
+		<result column="proCode" property="providerCode" />
+		<result column="proName" property="providerName" />
+		<result column="proDesc" property="providerDesc" />
+		<result column="proContact" property="providerContact" />
+		<result column="proPhone" property="providerPhone" />
+		<result column="proAddress" property="providerAddress" />
+		<result column="proFax" property="providerFax" />
+		<result column="createdBy" property="createdBy" />
+		<result column="creationDate" property="creationDate" />
+
+		<association property="bill" javaType="Bill">
+			<id column="id" property="providerId" />
+			<result column="isPayment" property="isPayment" />
+		</association>
+	</resultMap>
+
+	<select id="findProvider" resultMap="providerMap">
+		select proName,id from
+		smbms_provider
+	</select>
+
+	<select id="findProviderBy" resultMap="providerMap">
+		select
+		id,proCode,proName,proContact,proPhone,proFax,proDesc,creationDate
+		from smbms_provider
+		<where>
+			<if test="providerCode != null and providerCode != ''">
+				and proCode like CONCAT("%",#{providerCode},"%")
+			</if>
+			<if test="providerName != null and providerName != ''">
+				and proName like CONCAT("%",#{providerName},"%")
+			</if>
+		</where>
+	</select>
+
+	<select id="findById" resultMap="providerMap">
+		select
+		id,proCode,proName,proContact,proPhone,proAddress,proFax,proDesc
+		from
+		smbms_provider where id=#{providerId}
+	</select>
+
+	<select id="findTotalCount" resultType="int">
+		select count(1) from smbms_provider where 1=1<!-- proCode=#{providerCode} 
+			and proName=#{providerName} -->
+		<if test="providerCode != null and providerCode != ''">
+			and proCode like CONCAT("%",#{providerCode},"%")
+		</if>
+		<if test="providerName != null and providerName != ''">
+			and proName like CONCAT("%",#{providerName},"%")
+		</if>
+	</select>
+
+
+	<insert id="addProvider" parameterType="Provider">
+		insert into
+		smbms_provider values(#{id},#{providerCode},#{providerName},
+		#{providerDesc},#{providerContact},#{providerPhone},#{providerAddress},
+		#{providerFax},#{createdBy},#{creationDate},#{modifyDate},modifyBy=#{modifyBy})
+	</insert>
+
+	<update id="modifyProvider" parameterType="Provider">
+		update smbms_provider
+		set
+		proCode=#{providerCode},proName=#{providerName},proContact=#{providerContact},
+		proPhone=#{providerPhone},proAddress=#{providerAddress},proFax=#{providerFax},proDesc=#{providerDesc}
+		where id=#{id}
+	</update>
+
+	<!-- 他的返回值是provider类型，一个id对应的只有一个provider -->
+	<!-- <select id="checkIspayment" resultMap="billMap"> select p.*,b.isPayment 
+		from smbms_bill b, smbms_provider p where b.providerId=p.id and b.isPayment=1 
+		and p.id=#{provderId} </select> -->
+
+	<delete id="delProvider">
+		delete from smbms_provider where id=#{providerId}
+	</delete>
+</mapper>
